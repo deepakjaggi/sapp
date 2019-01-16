@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.company.department.sapp.entity.User;
+import com.company.department.sapp.exception.UserNotfoundException;
 import com.company.department.sapp.service.UserDaoService;
 
 @RestController
@@ -50,7 +51,9 @@ public class UserController {
 	
 		@GetMapping("/UsersWithURI/{id}")
 		public User retrieveUser(@PathVariable int id){
-			User user = userDaoService.findOne(id);			
+			User user = userDaoService.findOne(id);		
+			if(user==null)
+				throw new UserNotfoundException("User is not found for Id "+id);
 			return user;
 		}
 }

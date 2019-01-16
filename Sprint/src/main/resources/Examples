@@ -153,3 +153,81 @@ Example 3:  Extend this post API with URI concept which will give us confirmatio
 			
 			and you will get the status as 201 created... which is more reliable status than 200 status HTTP OK
 		
+Exmaple 4: With Exception Response ...
+		Add the exception response template class in Response package: ExcpetionResponse	
+			package com.company.department.sapp.response;
+			import java.util.Date;
+			public class ExcpetionResponse {
+
+				private Date timeStamp;
+				private String message;
+				private String details;
+				
+				public ExcpetionResponse(Date timeStamp, String message, String details) {
+					super();
+					this.timeStamp = timeStamp;
+					this.message = message;
+					this.details = details;
+				}
+				
+				public Date getTimeStamp() {
+					return timeStamp;
+				}
+				public void setTimeStamp(Date timeStamp) {
+					this.timeStamp = timeStamp;
+				}
+				public String getMessage() {
+					return message;
+				}
+				public void setMessage(String message) {
+					this.message = message;
+				}
+				public String getDetails() {
+					return details;
+				}
+				public void setDetails(String details) {
+					this.details = details;
+				}	
+			}
+		Add CustomizedExceptionhandler.java and UserNotfoundException.java in Exception Package
+			@ControllerAdvice
+			@Controller
+			public class CustomizedExceptionhandler extends ResponseEntityExceptionHandler{
+
+				@ExceptionHandler(Exception.class)
+				public final ResponseEntity<Object> handleAllException(Exception ex,WebRequest request){
+					ExcpetionResponse excpetionResponse = new ExcpetionResponse(new Date(),ex.getMessage(),request.getDescription(false));
+					
+					return new ResponseEntity(excpetionResponse,HttpStatus.INTERNAL_SERVER_ERROR);
+					
+				}
+			@ResponseStatus(HttpStatus.NOT_FOUND)
+			public class UserNotfoundException extends RuntimeException {
+
+				public UserNotfoundException(String message) {
+					super(message);
+					// TODO Auto-generated constructor stub
+				}
+		
+		Change this method		
+				@GetMapping("/UsersWithURI/{id}")
+				public User retrieveUser(@PathVariable int id){
+					User user = userDaoService.findOne(id);		
+					if(user==null)
+						throw new UserNotfoundException("User is not found for Id "+id);
+					return user;
+				}
+				Now before if you hit the URL for user not found, it would be give you NULL value and status is 200 OK.
+				But now if you give this URL  : http://localhost:8080/UsersWithURI/5   -- user 5 is non existing
+				it will give you proper JSON error message
+				{
+					"timeStamp": "2019-01-16T17:47:52.253+0000",
+					"message": "User is not found for Id 5",
+					"details": "uri=/UsersWithURI/5"
+				}
+				and status is 500 internal server error.
+				
+			So this is the standard way for handling the errors or exception.		
+Example 5:
+	sasd
+		
