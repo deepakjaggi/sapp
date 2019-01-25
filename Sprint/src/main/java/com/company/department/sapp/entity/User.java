@@ -1,19 +1,25 @@
 package com.company.department.sapp.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class User {
 	
+
 	@Id
 	@GeneratedValue
 	private Integer id;
 	private String name;
 	private Date birthDate;
+	
+	@OneToMany(mappedBy="user")
+	private List<Posts> posts;	
 	
 	public Integer getId() {
 		return id;
@@ -32,6 +38,13 @@ public class User {
 	}
 	public void setBirthDate(Date birthDate) {
 		this.birthDate = birthDate;
+	}
+	
+	public List<Posts> getPosts() {
+		return posts;
+	}
+	public void setPosts(List<Posts> posts) {
+		this.posts = posts;
 	}
 	
 	@Override
