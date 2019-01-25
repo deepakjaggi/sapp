@@ -1,0 +1,149 @@
+1. 	Why in UserController we have created object of interface, I am not clear about this concept, can you please explain ?	private UserRepo userRepo;
+2.	Need to understand the Exception Flow again .. I will ask question ... we have not given any ResponseEntity class in userNotFoundException, but how it is getting matched exactly to that class.
+3.	Ask the concept of One to many and many to one.
+4. 
+
+
+
+
+
+
+Step 1 	: 	Add H2 and Spring data JPA dependencies.
+			<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-jpa</artifactId>
+			</dependency>			
+Step 2	: 	Add these 2 in application.properties File.
+         	spring.jpa.show-sql=true
+			spring.h2.console.enabled=true
+			spring.jpa.generate-ddl=true
+			spring.jpa.database=H2
+			spring.datasource.url=jdbc:h2:mem:testDBSpring
+Step 3	:	 Create a UsersRepo	Interface
+		package com.company.department.sapp.repos;
+
+		import org.springframework.data.jpa.repository.JpaRepository;
+		import org.springframework.stereotype.Repository;
+
+		import com.company.department.sapp.entity.User;
+
+		@Repository
+		public interface UserRepo extends JpaRepository<User, Integer> {
+			
+		}
+		
+Step 4	:	Write this key work on user bean ... @Entity
+			These keywords will become the columns of the user table
+			
+			private Integer id;
+			private String name;
+			private Date birthDate;
+			
+		Also Define the primary key to the table :
+		
+				@Id		-- this will be primary key
+				@GeneratedValue	-- primary key values will be generated automatically, you do not need to provide any self input
+				
+				private Integer id;		
+
+Step 5 	:	When you will run it, you will see the logs :
+			Hibernate: create table user (id integer not null, birth_date timestamp, name varchar(255), primary key (id))			
+			But it will be empty value, you can put some static values.			
+			Create a file ... data.sql 			
+			insert into user values(50,sysdate(),'Rahul');
+			insert into user values(51,sysdate(),'Sumit');
+			insert into user values(52,sysdate(),'Ashish');			
+			You do not need to do any thing, data should be inserted automatically -- that is a spring feature.
+Step 6:		DB Console
+			http://localhost:8080/h2-console/
+			You will see your table : User
+		
+			in the database : testDBSpring
+
+Step 7:		Now Let us make a End Point
+			Create a new Controller : UserJpaController
+			
+			
+			package com.company.department.sapp.controller;
+
+			import java.util.List;
+
+			import org.springframework.beans.factory.annotation.Autowired;
+			import org.springframework.web.bind.annotation.GetMapping;
+			import org.springframework.web.bind.annotation.RestController;
+
+			import com.company.department.sapp.entity.User;
+			import com.company.department.sapp.repos.UserRepo;
+
+
+			@RestController
+			public class UserJpaController {
+				@Autowired
+				private UserRepo userRepo;
+				
+				@GetMapping("/jpa/users")
+				public List<User> retrieveUsers()
+				{
+					return userRepo.findAll();
+				}
+			}
+
+			
+			Hit that URL from postman : http://localhost:8080/jpa/users
+			
+			OP : 
+			
+			[
+				{
+					"id": 50,
+					"name": "Rahul",
+					"birthDate": "2019-01-25T09:32:48.789+0000"
+				},
+				{
+					"id": 51,
+					"name": "Sumit",
+					"birthDate": "2019-01-25T09:32:48.789+0000"
+				},
+				{
+					"id": 52,
+					"name": "Ashish",
+					"birthDate": "2019-01-25T09:32:48.789+0000"
+				}
+			]
+		
+Step 8:		Now Write this method and Handle the exception :
+			@GetMapping("/jpa/users/{id}")
+			public Optional<User> retrieveUser(@PathVariable int id){
+				Optional<User> user = userRepo.findById(id);
+				if(!user.isPresent())
+				throw new UserNotfoundException("User is not found for Id "+id);
+				return user;	
+			}
+
+			@GetMapping("/jpa/users/{id}")
+			public Optional<User> retrieveUser(@PathVariable int id) {
+				Optional<User> user = userRepo.findById(id);
+				if (!user.isPresent())
+					throw new UserNotfoundException("User is not found for Id " + id);
+				return user;
+			}
+
+			@PostMapping("/jpa/users")
+			public User addUserWithResponse(@Valid @RequestBody User user) {
+				User savedUser = userRepo.save(user);
+				return savedUser;
+			}
+
+			@DeleteMapping("/jpa/users/{id}")
+			public void deleteUser(@PathVariable int id) {
+				userRepo.deleteById(id);
+			}	
+		You can Test all the end points using Postman.
+Step 9:		Use the same steps and create a Posts Repo (User-s Post in facebook for ex:)
+			
+		
