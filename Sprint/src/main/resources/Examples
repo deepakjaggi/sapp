@@ -1,4 +1,4 @@
-Exmaple 1:  (GET API : http://localhost:8080/users)
+Exmaple 1: (GET API : http://localhost:8080/users)
 	Create a User.Java in Entity Package.
 		package com.company.department.sapp.entity;
 		import java.util.Date;		
@@ -91,7 +91,7 @@ Exmaple 1:  (GET API : http://localhost:8080/users)
 				return userDaoService.findAll();
 			}
 		}
-Exmaple 2: 	(Post API : http://localhost:8080/addUsers)
+Exmaple 2: (Post API : http://localhost:8080/addUsers)
 	Controller:
 		//Below method will add the specific User to the existing user's list
 		@PostMapping("/addUsers")
@@ -109,7 +109,7 @@ Exmaple 2: 	(Post API : http://localhost:8080/addUsers)
 		Put following in the request Body:
 		{
 			"name": "D1",
-		"birthDate": "2019-01-16T17:11:07.435+0000"
+			"birthDate": "2019-01-16T17:11:07.435+0000"
 		}
 Example 3:  Extend this post API with URI concept which will give us confirmation that user has been created and you can check on this URL
 			Add These 2 methods in Controller:
@@ -228,6 +228,167 @@ Exmaple 4: With Exception Response ...
 				and status is 500 internal server error.
 				
 			So this is the standard way for handling the errors or exception.		
-Example 5:
-	sasd
+Example 5: Add Swagger
+		Add these 2 dependancies in XML
+		
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+		
+		Create a new package - configuration
+		Add a SwaggerConfiguration class
+		
+		package com.company.department.sapp.configuration;
+
+		import java.util.Arrays;
+		import java.util.HashSet;
+		import java.util.Set;
+
+		import org.springframework.context.annotation.Bean;
+		import org.springframework.context.annotation.Configuration;
+
+		import springfox.documentation.service.ApiInfo;
+		import springfox.documentation.service.Contact;
+		import springfox.documentation.spi.DocumentationType;
+		import springfox.documentation.spring.web.plugins.Docket;
+		import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+		@Configuration
+		@EnableSwagger2
+		public class SwaggerConfiguration {
+			
+			private static final Contact DEFAULT_CONTACT_INFO = new Contact("Mitesh Upadhyay", "MiteshAPI", "upadhyaymitesh91@gmail.com");
+			private static final ApiInfo DEFAULT_API_INFO = new ApiInfo("REST API by Mitesh", "Sample REST API with Spring Boot", "1.0", "termsOfServiceUrl", 
+					DEFAULT_CONTACT_INFO, "license", "licenseUrl");
+			private static final Set<String> DEFAULT_PRODUCES_AND_CONSUMES = new HashSet<>(Arrays.asList("application/json","application/xml"));
+
+
+			//Documentation Type that we needed
+			@Bean
+			public Docket api() {
+				return new Docket(DocumentationType.SWAGGER_2);
+			}
+			
+		//	@Bean
+		//	public Docket api() {
+		//		return new Docket(DocumentationType.SWAGGER_2)
+		//				.apiInfo(DEFAULT_API_INFO)
+		//				.produces(DEFAULT_PRODUCES_AND_CONSUMES)
+		//				.consumes(DEFAULT_PRODUCES_AND_CONSUMES);
+		//	}
+			
+		}
+
+		
+		Now try out this swagger URL : http://localhost:8080/swagger-ui.html#/user-controller
+	
+		More about swagger on this : https://www.vojtechruzicka.com/documenting-spring-boot-rest-api-swagger-springfox/
+		
+		
+		
+Example 6: Spring Annotation Validation
+		   I was not able to validate this annotation
+Example 7: Filter controller - some times we do not want to show all the values in the output, and hence we use the filter bean.
+		   Create a new class - FilterBean		   
+			{
+			   package com.company.department.sapp.bean;
+				import com.fasterxml.jackson.annotation.JsonIgnore;
+				public class FilterBean {
+					public String country;
+					public String city;					
+					@JsonIgnore
+					public int countryCode;
+					
+					public FilterBean(String country, String city, int countryCode) {
+
+						this.country=country;
+						this.city=city;
+						this.countryCode=countryCode;
+						
+					}
+					public String getCountry() {
+						return country;
+					}
+
+					public void setCountry(String country) {
+						this.country = country;
+					}
+
+					public String getCity() {
+						return city;
+					}
+
+					public void setCity(String city) {
+						this.city = city;
+					}
+
+					public int getCountryCode() {
+						return countryCode;
+					}
+
+					public void setCountryCode(int countryCode) {
+						this.countryCode = countryCode;
+					}
+				}
+			}
+			Now create a controller
+				package com.company.department.sapp.controller;
+			   
+				import java.util.Arrays;
+				import java.util.List;
+
+				import org.springframework.http.converter.json.MappingJacksonValue;
+				import org.springframework.web.bind.annotation.GetMapping;
+				import org.springframework.web.bind.annotation.RestController;
+
+				import com.company.department.sapp.bean.FilterBean;
+				import com.fasterxml.jackson.databind.ser.FilterProvider;
+				import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+				import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
+				@RestController
+				public class FilterController {
+
+					@GetMapping("/filtering")
+					public FilterBean filterBean() {
+						return new FilterBean("India","Pune",411014);
+					}
+					
+					
+					@GetMapping("/filtering-list")
+					public List<FilterBean> filterBeanList() {
+						return Arrays.asList(new FilterBean("India","Pune",411014),
+										new FilterBean("India","Pune",411014));
+					}
+					
+					@GetMapping("/dynamicFiltering")
+					public MappingJacksonValue dynamicFilterBean() {
+						
+						FilterBean filterBean=new FilterBean("India","Pune",411014);
+						
+						SimpleBeanPropertyFilter filter=SimpleBeanPropertyFilter.filterOutAllExcept("country");
+						
+						FilterProvider filters=new SimpleFilterProvider().addFilter("MyFilterBean", filter);
+						
+						MappingJacksonValue jacksonValue=new MappingJacksonValue(filterBean);
+							jacksonValue.setFilters(filters);
+							
+						return jacksonValue;	
+					}
+				}
+	
+
+Example 8 : Versioning -- I need to understand more on this.
+
+Example 9 :
+	JPA
+	
+
 		

@@ -16,12 +16,14 @@ import com.company.department.sapp.response.ExcpetionResponse;
 @Controller
 public class CustomizedExceptionhandler extends ResponseEntityExceptionHandler {
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@ExceptionHandler(Exception.class)
 	public final ResponseEntity<Object> handleAllException(Exception ex, WebRequest request) {
 		
 		ExcpetionResponse excpetionResponse = new ExcpetionResponse(new Date(), ex.getMessage(),
 				request.getDescription(false));
 		
+		//return new ResponseEntity(excpetionResponse, HttpStatus.METHOD_NOT_ALLOWED);
 		return new ResponseEntity(excpetionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 
 	}
