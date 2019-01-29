@@ -17,8 +17,10 @@ public class User {
 
 	@Id
 	@GeneratedValue
-	@Size(min=2,message="Name can't have less than two characters")
+	
 	private Integer id;
+	
+	@Size(min=2,message="Name can't have less than two characters")
 	private String name;
 	private Date birthDate;
 	
