@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.Size;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @Entity
 public class User {
@@ -14,6 +17,7 @@ public class User {
 
 	@Id
 	@GeneratedValue
+	@Size(min=2,message="Name can't have less than two characters")
 	private Integer id;
 	private String name;
 	private Date birthDate;
