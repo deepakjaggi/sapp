@@ -9,8 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.Size;
 
-import io.swagger.annotations.ApiModelProperty;
-
 @Entity
 public class User {
 	
