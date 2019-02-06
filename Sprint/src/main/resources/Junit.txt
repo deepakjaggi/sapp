@@ -1,0 +1,116 @@
+Add a Junit 5 dependency in POM.xml
+	<dependency>
+		<groupId>org.junit.jupiter</groupId>
+		<artifactId>junit-jupiter-engine</artifactId>
+		<version>5.2.0</version>
+		<scope>test</scope>
+	</dependency>	
+Create a new Package Junit
+	Create a new interface : Igreeting 
+		public interface Igreeting {
+			public String greet(String name);
+		}
+	Create a new class : GreetingImpl and Add its unimplemented methods
+		public class GreetingImpl implements Igreeting {
+		@Override
+		public String greet(String name) 
+		{
+			if (name==null || name.length()==0)
+			{
+				throw new IllegalArgumentException();
+			}
+			return "Hello " + name;
+		}
+	}
+Now we will write the Junit test cases in TEST folder:
+	Run this Basic Junit file to understand the annotations of Junit	
+		import org.junit.jupiter.api.AfterAll;
+		import org.junit.jupiter.api.AfterEach;
+		import org.junit.jupiter.api.BeforeAll;
+		import org.junit.jupiter.api.BeforeEach;
+		import org.junit.jupiter.api.Disabled;
+		import org.junit.jupiter.api.DisplayName;
+		import org.junit.jupiter.api.Test;
+		class GreetingTest {
+		
+			@BeforeAll
+			static void setup() {
+				System.out.println("******* This method will run before ALL Test methods *********");
+			}
+			
+			@BeforeEach
+			void runBeforeEach() {
+				System.out.println("---");
+				System.out.println("This method will run before Each Test methods");
+			}
+			@Test
+			@DisplayName("TEST 1")
+			void test1() {
+				System.out.println("Test 1");
+			}
+
+			@Test
+			@DisplayName("TEST 2")
+			@Disabled("Not implemented yet")
+			void test2() {
+				System.out.println("Test 2");
+			}
+			@AfterEach
+			void runAfterEach() {
+				System.out.println("This method will run after Each Test methods");
+				System.out.println("---");
+			}
+			
+			@AfterAll
+			static void tearDown() {
+				System.out.println("******* This method will run after ALL Test methods *********");
+			}
+		}
+Now we will Add the test cases for Greetings IMPL
+	Add these test cases for Greeting File	
+		package com.example.junitTest;
+
+		import org.junit.jupiter.api.Assertions;
+		import org.junit.jupiter.api.BeforeEach;
+		import org.junit.jupiter.api.Test;
+
+		import com.company.department.sapp.junit.GreetingImpl;
+		import com.company.department.sapp.junit.Igreeting;
+
+		class GreetingTest {
+
+			private Igreeting iGreeting;	
+			
+			@BeforeEach
+			void runBeforeEach() {
+				iGreeting = new GreetingImpl();
+			}
+			@Test
+			void greetShouldReturnValidOutput() {
+				System.out.println("greetShouldReturnValidOutput");
+				String result = iGreeting.greet("Manoj");
+				
+				Assertions.assertNotNull(result);
+				Assertions.assertEquals("Hello Manoj", result);
+			}
+			
+			@Test
+			public void greetShouldThrowException() {
+				System.out.println("greetShouldThrowException");
+				Assertions.assertThrows
+					(IllegalArgumentException.class, ()->{
+						iGreeting.greet(null);
+				});		
+			}
+			
+			@Test
+			public void greetShouldCheckForBlankName() {
+				System.out.println("greetShouldCheckForBlankName");
+				Assertions.assertThrows
+				(IllegalArgumentException.class, ()->{
+					iGreeting.greet(null);
+				});
+				
+			}
+		}
+
